@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Board of AI Advisors</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151f32',
+                            950: '#0b0f19'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.5); border-radius: 3px; }
+        @keyframes pulse-subtle { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .animate-pulse-subtle { animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-full flex flex-col overflow-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-md shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold text-lg">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base md:text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">AI Boardroom</h1>
+                <p class="text-xs text-slate-400 hidden sm:block">Executive Mentorship & Strategy System</p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <button onclick="switchTab('board')" id="tab-btn-board" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center space-x-2 bg-indigo-600 text-white shadow">
+                <i class="fa-solid fa-users-rectangle"></i>
+                <span class="hidden md:inline">The Board</span>
+            </button>
+            <button onclick="switchTab('strategy')" id="tab-btn-strategy" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-chess-board"></i>
+                <span class="hidden md:inline">Strategic Plan</span>
+            </button>
+            <button onclick="switchTab('actions')" id="tab-btn-actions" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-list-check"></i>
+                <span class="hidden md:inline">Action Queue</span>
+            </button>
+            <button onclick="switchTab('settings')" id="tab-btn-settings" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-gear"></i>
+                <span class="hidden md:inline">Settings</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-1 overflow-hidden relative">
+
+        <!-- TAB 1: THE BOARD & ROUNDTABLE -->
+        <section id="tab-board" class="tab-content h-full flex flex-col md:flex-row overflow-hidden p-4 gap-4">
+            <!-- Left Side: Advisor Roster -->
+            <div class="w-full md:w-80 flex flex-col gap-3 shrink-0 overflow-y-auto custom-scrollbar pr-1">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Your Advisors (6)</h2>
+                    <button onclick="openConsultModal()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-comments mr-1"></i> Quick Consult
+                    </button>
+                </div>
+                <div id="advisor-list-container" class="flex flex-col gap-2.5">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Right Side: Roundtable Conference Room & Simulation -->
+            <div class="flex-1 flex flex-col bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-xl backdrop-blur">
+                <div class="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-900/80">
+                    <div>
+                        <h2 class="font-bold text-base md:text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-circle-nodes text-indigo-400"></i> Roundtable Conference Room
+                        </h2>
+                        <p class="text-xs text-slate-400">Simulate collective multi-advisor board meetings and strategic debriefs.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="roundtable-agenda" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="quarterly">Quarterly Strategic Review & Growth Bottlenecks</option>
+                            <option value="pivot">Navigating Sudden Market Shifts & Burnout Risk</option>
+                            <option value="execution">High-Stakes Delegation & Milestone Acceleration</option>
+                        </select>
+                        <button onclick="startRoundtable()" id="start-roundtable-btn" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium px-4 py-1.5 rounded-xl text-xs transition shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-play"></i> Convene Meeting
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Roundtable Dialogue Area -->
+                <div id="roundtable-transcript" class="flex-1 p-4 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+                    <div class="flex flex-col items-center justify-center h-full text-center text-slate-500 p-6">
+                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 text-2xl mb-3 shadow-inner">
+                            <i class="fa-solid fa-people-line"></i>
+                        </div>
+                        <h3 class="font-semibold text-slate-300 text-sm mb-1">The Conference Room is Quiet</h3>
+                        <p class="text-xs max-w-md">Select an agenda above and click <span class="text-indigo-400 font-medium">Convene Meeting</span> to initiate a synthesized roundtable discussion with your advisory board.</p>
+                    </div>
+                </div>
+
+                <!-- Interactive Reply Input -->
+                <div class="p-3 border-t border-slate-800 bg-slate-900/90 flex gap-2">
+                    <input type="text" id="user-interject-input" placeholder="Interject or ask the board a question..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter') sendInterjection()">
+                    <button onclick="sendInterjection()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-medium transition shadow">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: STRATEGIC PLAN -->
+        <section id="tab-strategy" class="tab-content h-full hidden flex flex-col overflow-y-auto custom-scrollbar p-4 md:p-6 max-w-5xl mx-auto w-full gap-6">
+            <div class="bg-gradient-to-r from-indigo-950/40 via-purple-950/40 to-slate-900 border border-indigo-500/20 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Master Strategic Blueprint</span>
+                    <button onclick="exportStrategy()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Export Blueprint
+                    </button>
+                </div>
+                <h2 id="strategy-title" class="text-xl md:text-2xl font-bold text-white mb-2">Synthesized Plan of Action</h2>
+                <p id="strategy-overview" class="text-slate-300 text-xs md:text-sm leading-relaxed mb-4">Track overall strategic objectives, measurable goals, follow-up timeframes, strict milestones, and deadlines synthesized directly from your advisor consultations.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-slate-800/80 text-xs">
+                    <div>
+                        <span class="text-slate-400 block mb-1">Core Focus Archetype</span>
+                        <span id="stat-focus" class="font-semibold text-indigo-300">Scale & Operational Excellence</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block mb-1">Active Milestones</span>
+                        <span id="stat-milestones" class="font-semibold text-purple-300">12 Tracked Items</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block mb-1">Board Alignment Score</span>
+                        <span class="font-semibold text-emerald-400">96.4% Optimized</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy Sections Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="strategy-sections-grid">
+                <!-- Dynamically populated core strategic areas -->
+            </div>
+        </section>
+
+        <!-- TAB 3: ACTION QUEUE -->
+        <section id="tab-actions" class="tab-content h-full hidden flex flex-col overflow-y-auto custom-scrollbar p-4 md:p-6 max-w-5xl mx-auto w-full gap-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-400"></i> Action Queue & Milestones
+                    </h2>
+                    <p class="text-xs text-slate-400">Manage, prioritize, and track actionable items assigned by your advisors.</p>
+                </div>
+                <button onclick="openNewActionModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-medium transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Action Item
+                </button>
+            </div>
+
+            <!-- Action Filters & Stats -->
+            <div class="flex flex-wrap gap-2 items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
+                <div class="flex gap-2">
+                    <button onclick="filterActions('all')" id="filter-all" class="px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white transition">All Items</button>
+                    <button onclick="filterActions('Not Started')" id="filter-not-started" class="px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Not Started</button>
+                    <button onclick="filterActions('In Progress')" id="filter-in-progress" class="px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">In Progress</button>
+                    <button onclick="filterActions('Completed')" id="filter-completed" class="px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Completed</button>
+                </div>
+                <div class="text-xs text-slate-400" id="action-counter">Showing all items</div>
+            </div>
+
+            <!-- Action Items List -->
+            <div id="action-list-container" class="flex flex-col gap-3 pb-6">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 4: SETTINGS & PROFILE -->
+        <section id="tab-settings" class="tab-content h-full hidden flex flex-col overflow-y-auto custom-scrollbar p-4 md:p-6 max-w-3xl mx-auto w-full gap-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-white mb-1">User Profile & Board Calibration</h2>
+                    <p class="text-xs text-slate-400">Tailor your background, core values, and strategic non-negotiables so advisors speak directly to your unique mission.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Professional History & Context</label>
+                        <textarea id="profile-history" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="Professional history, core competencies, defining life experiences..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Core Values & Non-Negotiables</label>
+                        <textarea id="profile-values" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="Faith, family, uncompromising integrity, operational excellence..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Current Strategic Focus</label>
+                        <input type="text" id="profile-focus" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="e.g. Scaling Series A operations and sustainable leadership">
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button onclick="saveProfileSettings()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-medium transition shadow">
+                            <i class="fa-solid fa-floppy-disk mr-1.5"></i> Save Profile & Recalibrate Board
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Backup & Reset -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white mb-1">Data & System Management</h2>
+                    <p class="text-xs text-slate-400">Backup your board state or restore default factory configuration.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="exportFullBackup()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-medium transition border border-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-file-arrow-down"></i> Export Full JSON Backup
+                    </button>
+                    <button onclick="resetSystemData()" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 px-4 py-2 rounded-xl text-xs font-medium transition border border-rose-800/50 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reset to Factory State
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ADVISOR CONSULTATION MODAL -->
+    <div id="consult-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+                <div class="flex items-center gap-3">
+                    <div id="modal-advisor-icon" class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow"></div>
+                    <div>
+                        <h3 id="modal-advisor-name" class="font-bold text-sm text-white">Advisor Name</h3>
+                        <p id="modal-advisor-title" class="text-xs text-indigo-400">Advisor Title</p>
+                    </div>
+                </div>
+                <button onclick="closeConsultModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <div id="consult-dialogue-area" class="flex-1 p-4 overflow-y-auto custom-scrollbar flex flex-col gap-3 max-h-[50vh] bg-slate-950/50">
+                <!-- Dialogue items -->
+            </div>
+            <div class="p-3 border-t border-slate-800 bg-slate-900 flex gap-2">
+                <input type="text" id="consult-user-input" placeholder="Ask your advisor anything..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter') sendAdvisorMessage()">
+                <button onclick="sendAdvisorMessage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-medium transition shadow">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW ACTION ITEM MODAL -->
+    <div id="action-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus text-indigo-400"></i> New Action Item
+                </h3>
+                <button onclick="closeNewActionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Action Title</label>
+                    <input type="text" id="new-act-title" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="e.g. Audit Q3 financial runway">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Assigned Advisor</label>
+                        <select id="new-act-advisor" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <!-- Populated -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Timeframe</label>
+                        <input type="text" id="new-act-timeframe" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="e.g. Next 7 Days">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Deadline Date</label>
+                    <input type="date" id="new-act-deadline" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Milestones (Comma separated)</label>
+                    <input type="text" id="new-act-milestones" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="Draft outline, Review with team, Final sign-off">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeNewActionModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:bg-slate-800 transition">Cancel</button>
+                <button onclick="saveNewAction()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-xl text-xs font-medium transition shadow">Save Action</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Box -->
+    <div id="toast-box" class="fixed bottom-5 right-5 bg-slate-900 border border-indigo-500/40 text-slate-100 px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-indigo-400 text-base"></i>
+        <div>
+            <h4 id="toast-title" class="font-semibold text-xs">Notification</h4>
+            <p id="toast-msg" class="text-[11px] text-slate-400">Action executed successfully.</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // State Management
+        const STATE = {
+            currentTab: 'board',
+            activeAdvisorId: null,
+            filterStatus: 'all',
+            profile: {
+                history: "Experienced entrepreneur and operational leader with a deep commitment to excellence, community empowerment, and structural foundation.",
+                values: "Faith, family, uncompromising integrity, operational excellence, community impact, and sustainable growth.",
+                focus: "Scaling enterprise architecture, high-performance execution, and disciplined milestone management."
+            },
+            advisors: [
+                {
+                    id: 'navigator',
+                    name: 'The Navigator',
+                    title: 'Strategic Vision & Long-Range Planning',
+                    persona: 'Rigorous, visionary, uncompromised by short-term noise. Focuses on horizon mapping, long-term leverage, and positioning.',
+                    color: 'from-blue-600 to-indigo-600',
+                    icon: 'fa-compass',
+                    greeting: 'Greetings. Let us examine the horizon. Where are we steering our enterprise over the next 3 to 5 years?'
+                },
+                {
+                    id: 'skill_builder',
+                    name: 'The Skill Builder',
+                    title: 'Talent Architecture & Capability Development',
+                    persona: 'Pragmatic, skill-obsessed, coaches for high leverage and compounding team capabilities.',
+                    color: 'from-emerald-600 to-teal-600',
+                    icon: 'fa-graduation-cap',
+                    greeting: 'Welcome. Systems and strategies are only as robust as the people executing them. What capabilities are we unlocking today?'
+                },
+                {
+                    id: 'challenger',
+                    name: 'The Challenger',
+                    title: 'Critical Audit & Blind Spot Red Teamer',
+                    persona: 'Relentless, honest, provocative. Tests assumptions, probes for fragility, and stresses execution plans.',
+                    color: 'from-rose-600 to-red-600',
+                    icon: 'fa-shield-halved',
+                    greeting: 'Glad you arrived. Let us drop the pleasantries—what assumptions are we currently making that could ruin our timeline?'
+                },
+                {
+                    id: 'connector',
+                    name: 'The Connector',
+                    title: 'Ecosystem Synergy & Strategic Alliances',
+                    persona: 'Relational, opportunity-minded, masters of network leverage, partnerships, and high-value introductions.',
+                    color: 'from-amber-600 to-orange-600',
+                    icon: 'fa-network-wired',
+                    greeting: 'Hello! Every bottleneck has a partnership or network solution. Who do we need in our corner right now?'
+                },
+                {
+                    id: 'grounding_voice',
+                    name: 'The Grounding Voice',
+                    title: 'Pragmatic Execution & Tactical Focus',
+                    persona: 'Calm, grounded, anti-hype. Demands clear next steps, resource reality checks, and disciplined cadence.',
+                    color: 'from-purple-600 to-fuchsia-600',
+                    icon: 'fa-anchor',
+                    greeting: 'Take a breath. Let us ground ourselves in immediate reality. What is the single most important action item for today?'
+                },
+                {
+                    id: 'wellness_sentinel',
+                    name: 'The Wellness Sentinel',
+                    title: 'Sustainable Leadership & Energy Management',
+                    persona: 'Empathetic, holistic, protective of founder energy, cognitive stamina, and long-term sustainability.',
+                    color: 'from-cyan-600 to-sky-600',
+                    icon: 'fa-heart-pulse',
+                    greeting: 'Welcome back. Leadership requires sustainable stamina. How is your personal energy and cognitive reserve holding up?'
+                }
+            ],
+            strategySections: [
+                {
+                    id: 'market_pos',
+                    title: 'Market Positioning & Horizon Vision',
+                    lead: 'The Navigator',
+                    content: 'Establish undisputed category authority by aligning core competencies with long-term macroeconomic tailwinds. Eliminate low-leverage distractions.'
+                },
+                {
+                    id: 'talent_ops',
+                    title: 'Talent Architecture & Capability Scaling',
+                    lead: 'The Skill Builder',
+                    content: 'Upgrade execution velocity through deliberate delegation frameworks, rigorous documentation, and continuous team capability audits.'
+                },
+                {
+                    id: 'risk_audit',
+                    title: 'Critical Risk & Vulnerability Mitigation',
+                    lead: 'The Challenger',
+                    content: 'Stress-test all financial runways and operational dependencies against sudden market contractions or key-person bottlenecks.'
+                },
+                {
+                    id: 'ecosystem',
+                    title: 'Ecosystem & Partnership Leverage',
+                    lead: 'The Connector',
+                    content: 'Forge 3 strategic alliances this quarter to accelerate distribution and unlock shared resource pools without heavy capital expenditure.'
+                }
+            ],
+            actions: [
+                { id: 1, title: 'Finalize Q3 Strategic Roadmap & Milestone Timeline', advisor: 'The Navigator', timeframe: 'Next 3 Days', deadline: '2026-06-01', status: 'In Progress', milestones: ['Draft core pillars', 'Review with leadership', 'Publish final doc'] },
+                { id: 2, title: 'Conduct Team Capability Audit & Delegation Matrix', advisor: 'The Skill Builder', timeframe: 'Next 7 Days', deadline: '2026-06-05', status: 'Not Started', milestones: ['List key workflows', 'Identify bottlenecks', 'Assign owners'] },
+                { id: 3, title: 'Stress-Test Cash Runway & Contingency Reserves', advisor: 'The Challenger', timeframe: 'Immediate', deadline: '2026-05-30', status: 'Completed', milestones: ['Pull financial reports', 'Simulate downside scenario', 'Establish buffer fund'] },
+                { id: 4, title: 'Schedule Partnership Outreach Sessions', advisor: 'The Connector', timeframe: 'Next 14 Days', deadline: '2026-06-12', status: 'Not Started', milestones: ['Identify target partners', 'Draft outreach briefs', 'Book introductory calls'] }
+            ]
+        };
+
+        // Initialize App on Load
+        window.onload = function() {
+            renderAdvisorsList();
+            renderStrategySections();
+            renderActionsList();
+            populateAdvisorSelect();
+            loadProfileToUI();
+        };
+
+        // Tab Switching
+        function switchTab(tabId) {
+            STATE.currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Update nav styles
+            ['board', 'strategy', 'actions', 'settings'].forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if(t === tabId) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center space-x-2 bg-indigo-600 text-white shadow";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200";
+                }
+            });
+        }
+
+        // Render Advisor Roster
+        function renderAdvisorsList() {
+            const container = document.getElementById('advisor-list-container');
+            container.innerHTML = '';
+            STATE.advisors.forEach(adv => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl p-3.5 transition flex flex-col gap-2.5 group cursor-pointer shadow-sm";
+                card.onclick = () => openConsultModal(adv.id);
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr ${adv.color} flex items-center justify-center text-white text-xs font-bold shadow">
+                                <i class="fa-solid ${adv.icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xs text-slate-200 group-hover:text-indigo-400 transition">${adv.name}</h3>
+                                <p class="text-[10px] text-slate-400 line-clamp-1">${adv.title}</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-600 text-xs group-hover:text-indigo-400 transition transform group-hover:translate-x-0.5"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">${adv.persona}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Roundtable Simulation
+        function startRoundtable() {
+            const agendaKey = document.getElementById('roundtable-agenda').value;
+            const transcript = document.getElementById('roundtable-transcript');
+            transcript.innerHTML = '';
+
+            let agendaTitle = "Quarterly Strategic Review & Growth Bottlenecks";
+            if(agendaKey === 'pivot') agendaTitle = "Navigating Sudden Market Shifts & Burnout Risk";
+            if(agendaKey === 'execution') agendaTitle = "High-Stakes Delegation & Milestone Acceleration";
+
+            showToast("Roundtable Convened", "Your advisors are deliberating on the agenda.");
+
+            // Add opening message
+            appendTranscriptMessage("system", "Board Moderator", "fa-circle-nodes", `Convening Board Session: <span class="text-white font-medium">${agendaTitle}</span>. All 6 advisors are present.`);
+
+            // Sequential simulated thoughts
+            setTimeout(() => {
+                appendAdvisorTranscriptMsg(STATE.advisors[0], `Looking at the macro horizon for "${agendaTitle}", our primary directive is maintaining uncompromised focus on long-term leverage without getting bogged down by daily tactical friction.`);
+            }, 800);
+
+            setTimeout(() => {
+                appendAdvisorTranscriptMsg(STATE.advisors[2], `I must interject. Our long-term vision means nothing if our execution timeline has hidden friction points. What assumptions are we failing to stress-test right now?`);
+            }, 1800);
+
+            setTimeout(() => {
+                appendAdvisorTranscriptMsg(STATE.advisors[4], `Let us calm the rhetoric. We need strict milestones and clear ownership. Let's look at the Action Queue and ensure each deliverable has a definitive deadline.`);
+            }, 2800);
+
+            setTimeout(() => {
+                appendAdvisorTranscriptMsg(STATE.advisors[5], `And while we accelerate execution, let's remember founder stamina. Burnout destroys more ventures than bad market fit.`);
+            }, 3800);
+        }
+
+        function appendTranscriptMessage(type, name, icon, htmlContent) {
+            const transcript = document.getElementById('roundtable-transcript');
+            const div = document.createElement('div');
+            div.className = "flex gap-3 animate-fade-in";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 text-xs shrink-0 shadow">
+                    <i class="fa-solid ${icon}"></i>
+                </div>
+                <div class="flex-1 bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 shadow-sm">
+                    <div class="font-semibold text-slate-200 mb-1 flex items-center justify-between">
+                        <span>${name}</span>
+                        <span class="text-[10px] text-slate-500 font-normal">Just now</span>
+                    </div>
+                    <p class="leading-relaxed">${htmlContent}</p>
+                </div>
+            `;
+            transcript.appendChild(div);
+            transcript.scrollTop = transcript.scrollHeight;
+        }
+
+        function appendAdvisorTranscriptMsg(adv, msg) {
+            const transcript = document.getElementById('roundtable-transcript');
+            const div = document.createElement('div');
+            div.className = "flex gap-3 animate-fade-in";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr ${adv.color} flex items-center justify-center text-white text-xs shrink-0 shadow">
+                    <i class="fa-solid ${adv.icon}"></i>
+                </div>
+                <div class="flex-1 bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 shadow-sm">
+                    <div class="font-semibold text-slate-200 mb-1 flex items-center justify-between">
+                        <span>${adv.name} <span class="text-[10px] text-indigo-400 font-normal">(${adv.title})</span></span>
+                        <span class="text-[10px] text-slate-500 font-normal">Roundtable</span>
+                    </div>
+                    <p class="leading-relaxed">${msg}</p>
+                </div>
+            `;
+            transcript.appendChild(div);
+            transcript.scrollTop = transcript.scrollHeight;
+        }
+
+        function sendInterjection() {
+            const input = document.getElementById('user-interject-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const transcript = document.getElementById('roundtable-transcript');
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex gap-3 flex-row-reverse animate-fade-in";
+            userDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs shrink-0 shadow">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="flex-1 bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-3 text-xs text-slate-200 shadow-sm text-right">
+                    <div class="font-semibold text-indigo-300 mb-1">You (Executive Lead)</div>
+                    <p class="leading-relaxed">${escapeHtml(text)}</p>
+                </div>
+            `;
+            transcript.appendChild(userDiv);
+            input.value = '';
+            transcript.scrollTop = transcript.scrollHeight;
+
+            // Simulated Challenger or Navigator response
+            setTimeout(() => {
+                const randomAdv = STATE.advisors[Math.floor(Math.random() * STATE.advisors.length)];
+                appendAdvisorTranscriptMsg(randomAdv, `That is a vital point regarding "${text}". Based on your core values ("${STATE.profile.values.substring(0,40)}..."), my recommendation is to immediately integrate this into our milestone queue and test it against our weekly execution rhythm.`);
+            }, 1000);
+        }
+
+        // Individual Advisor Consultation Modal
+        function openConsultModal(advisorId = 'navigator') {
+            STATE.activeAdvisorId = advisorId;
+            const adv = STATE.advisors.find(a => a.id === advisorId);
+            if(!adv) return;
+
+            document.getElementById('modal-advisor-name').innerText = adv.name;
+            document.getElementById('modal-advisor-title').innerText = adv.title;
+            const iconDiv = document.getElementById('modal-advisor-icon');
+            iconDiv.className = `w-9 h-9 rounded-xl bg-gradient-to-tr ${adv.color} flex items-center justify-center text-white text-sm font-bold shadow`;
+            iconDiv.innerHTML = `<i class="fa-solid ${adv.icon}"></i>`;
+
+            const dialogueArea = document.getElementById('consult-dialogue-area');
+            dialogueArea.innerHTML = `
+                <div class="flex gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-tr ${adv.color} flex items-center justify-center text-white text-[10px] shrink-0">
+                        <i class="fa-solid ${adv.icon}"></i>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 shadow-sm max-w-[85%]">
+                        <p class="leading-relaxed">${adv.greeting}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('consult-modal').classList.remove('hidden');
+        }
+
+        function closeConsultModal() {
+            document.getElementById('consult-modal').classList.add('hidden');
+        }
+
+        function sendAdvisorMessage() {
+            const input = document.getElementById('consult-user-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const adv = STATE.advisors.find(a => a.id === STATE.activeAdvisorId);
+            const dialogueArea = document.getElementById('consult-dialogue-area');
+
+            // User message
+            const userMsg = document.createElement('div');
+            userMsg.className = "flex gap-2.5 flex-row-reverse";
+            userMsg.innerHTML = `
+                <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[10px] shrink-0">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="bg-indigo-950/50 border border-indigo-500/30 rounded-xl p-3 text-xs text-slate-200 shadow-sm max-w-[85%] text-right">
+                    <p class="leading-relaxed">${escapeHtml(text)}</p>
+                </div>
+            `;
+            dialogueArea.appendChild(userMsg);
+            input.value = '';
+            dialogueArea.scrollTop = dialogueArea.scrollHeight;
+
+            // Simulated Advisor reply
+            setTimeout(() => {
+                const replyMsg = document.createElement('div');
+                replyMsg.className = "flex gap-2.5 animate-fade-in";
+                replyMsg.innerHTML = `
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-tr ${adv.color} flex items-center justify-center text-white text-[10px] shrink-0">
+                        <i class="fa-solid ${adv.icon}"></i>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 shadow-sm max-w-[85%]">
+                        <p class="leading-relaxed">Regarding "${text}": In alignment with your background as an ${STATE.profile.history.substring(0,45)}..., we must execute with absolute precision. Let's assign this directly into the Action Queue with a clear milestone breakdown.</p>
+                    </div>
+                `;
+                dialogueArea.appendChild(replyMsg);
+                dialogueArea.scrollTop = dialogueArea.scrollHeight;
+            }, 800);
+        }
+
+        // Render Strategy Plan
+        function renderStrategySections() {
+            const grid = document.getElementById('strategy-sections-grid');
+            grid.innerHTML = '';
+            STATE.strategySections.forEach(sec => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-sm text-white">${sec.title}</h3>
+                            <span class="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full">${sec.lead}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">${sec.content}</p>
+                    </div>
+                    <div class="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Status: Optimized</span>
+                        <button onclick="switchTab('actions')" class="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1">
+                            View Actions <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            document.getElementById('stat-milestones').innerText = `${STATE.actions.length} Tracked Items`;
+            document.getElementById('stat-focus').innerText = STATE.profile.focus.substring(0, 35) + '...';
+        }
+
+        // Render Action Queue
+        function renderActionsList() {
+            const container = document.getElementById('action-list-container');
+            container.innerHTML = '';
+
+            const filtered = STATE.actions.filter(act => {
+                if(STATE.filterStatus === 'all') return true;
+                return act.status === STATE.filterStatus;
+            });
+
+            document.getElementById('action-counter').innerText = `Showing ${filtered.length} of ${STATE.actions.length} items`;
+
+            filtered.forEach(act => {
+                let badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+                if(act.status === 'Completed') badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                if(act.status === 'In Progress') badgeColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4";
+                card.innerHTML = `
+                    <div class="space-y-1.5 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-medium px-2.5 py-0.5 rounded-full border ${badgeColor}">${act.status}</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-user-tie mr-1 text-indigo-400"></i>${act.advisor}</span>
+                            <span class="text-[10px] text-slate-400"><i class="fa-solid fa-clock mr-1 text-slate-500"></i>${act.timeframe}</span>
+                            <span class="text-[10px] text-slate-400"><i class="fa-solid fa-calendar mr-1 text-slate-500"></i>Due: ${act.deadline}</span>
+                        </div>
+                        <h4 class="font-bold text-xs md:text-sm text-white">${act.title}</h4>
+                        <div class="flex items-center gap-2 flex-wrap pt-1">
+                            <span class="text-[10px] text-slate-400 font-medium">Milestones:</span>
+                            ${act.milestones.map(m => `<span class="text-[10px] bg-slate-950 border border-slate-800 text-slate-300 px-2 py-0.5 rounded">${m}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <select onchange="updateActionStatus(${act.id}, this.value)" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="Not Started" ${act.status==='Not Started'?'selected':''}>Not Started</option>
+                            <option value="In Progress" ${act.status==='In Progress'?'selected':''}>In Progress</option>
+                            <option value="Completed" ${act.status==='Completed'?'selected':''}>Completed</option>
+                        </select>
+                        <button onclick="deleteAction(${act.id})" class="text-slate-500 hover:text-rose-400 p-2 rounded-xl hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterActions(status) {
+            STATE.filterStatus = status;
+            ['all', 'Not Started', 'In Progress', 'Completed'].forEach(s => {
+                const btnId = s === 'all' ? 'filter-all' : `filter-${s.toLowerCase().replace(' ', '-')}`;
+                const btn = document.getElementById(btnId);
+                if(s === status) {
+                    btn.className = "px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600 text-white transition";
+                } else {
+                    btn.className = "px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+                }
+            });
+            renderActionsList();
+        }
+
+        function updateActionStatus(id, newStatus) {
+            const act = STATE.actions.find(a => a.id === id);
+            if(act) {
+                act.status = newStatus;
+                renderActionsList();
+                showToast("Action Updated", `Status changed to ${newStatus}`);
+            }
+        }
+
+        function deleteAction(id) {
+            STATE.actions = STATE.actions.filter(a => a.id !== id);
+            renderActionsList();
+            renderStrategySections();
+            showToast("Action Removed", "Item deleted from queue");
+        }
+
+        function openNewActionModal() {
+            document.getElementById('action-modal').classList.remove('hidden');
+        }
+
+        function closeNewActionModal() {
+            document.getElementById('action-modal').classList.add('hidden');
+        }
+
+        function populateAdvisorSelect() {
+            const select = document.getElementById('new-act-advisor');
+            select.innerHTML = '';
+            STATE.advisors.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.name;
+                opt.innerText = a.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function saveNewAction() {
+            const title = document.getElementById('new-act-title').value.trim();
+            const advisor = document.getElementById('new-act-advisor').value;
+            const timeframe = document.getElementById('new-act-timeframe').value.trim() || 'Next 7 Days';
+            const deadline = document.getElementById('new-act-deadline').value || new Date().toISOString().split('T')[0];
+            const milestonesRaw = document.getElementById('new-act-milestones').value.trim();
+            const milestones = milestonesRaw ? milestonesRaw.split(',').map(m => m.trim()) : ['Initial phase', 'Review & Execution'];
+
+            if(!title) {
+                showToast("Validation Error", "Please enter an action title.");
+                return;
+            }
+
+            STATE.actions.unshift({
+                id: Date.now(),
+                title,
+                advisor,
+                timeframe,
+                deadline,
+                status: 'Not Started',
+                milestones
+            });
+
+            closeNewActionModal();
+            renderActionsList();
+            renderStrategySections();
+            showToast("Action Created", "New milestone added to queue.");
+
+            // Clear inputs
+            document.getElementById('new-act-title').value = '';
+            document.getElementById('new-act-milestones').value = '';
+        }
+
+        // Profile & Settings
+        function loadProfileToUI() {
+            document.getElementById('profile-history').value = STATE.profile.history;
+            document.getElementById('profile-values').value = STATE.profile.values;
+            document.getElementById('profile-focus').value = STATE.profile.focus;
+        }
+
+        function saveProfileSettings() {
+            STATE.profile.history = document.getElementById('profile-history').value;
+            STATE.profile.values = document.getElementById('profile-values').value;
+            STATE.profile.focus = document.getElementById('profile-focus').value;
+            renderStrategySections();
+            showToast("Profile Saved", "Your board has been recalibrated to your new context.");
+        }
+
+        function exportStrategy() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(STATE.strategySections, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `strategy_blueprint_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Export Successful", "Strategic Blueprint downloaded.");
+        }
+
+        function exportFullBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(STATE, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `board_of_ai_advisors_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Backup Successful", "Full board state exported.");
+        }
+
+        function resetSystemData() {
+            if(confirm("Are you sure you want to reset all data to default factory settings?")) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+
+        // Toast Helper
+        function showToast(title, msg) {
+            const toast = document.getElementById('toast-box');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
